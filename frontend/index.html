@@ -1,83 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Lesson Planner</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>AI Lesson Planner | Save Hours of Prep</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-    <div class="container">
-        <header>
+    <nav class="navbar">
+        <div class="container navbar-content">
             <div class="logo">
-                <div class="logo-icon"></div>
-                <h1>LessonGenius <small>AI</small></h1>
+                <span class="logo-icon">🍎</span>
+                <span class="logo-text">Lesson<strong>AI</strong></span>
             </div>
-            <p>Generate production-ready lesson plans & worksheets in seconds.</p>
-        </header>
+            <div class="settings">
+                <input type="password" id="apiKey" placeholder="Enter API Key (Bearer Token)" aria-label="API Key">
+                <span class="key-status" id="keyStatus"></span>
+            </div>
+        </div>
+    </nav>
 
-        <main>
-            <section class="input-section">
-                <div class="card glass">
-                    <h2>Configuration</h2>
-                    <form id="lesson-form">
-                        <div class="form-group">
-                            <label for="apiKey">API Key <small>(Simulated Auth)</small></label>
-                            <input type="password" id="apiKey" placeholder="sk-..." value="paid_test_key_123" required>
-                            <small class="hint">Use "paid_..." to simulate pro tier</small>
-                        </div>
-                        
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="grade">Grade Level</label>
-                                <select id="grade" required>
-                                    <option value="" disabled selected>Select Grade</option>
-                                    <option value="Kindergarten">Kindergarten</option>
-                                    <option value="Grade 1">Grade 1</option>
-                                    <option value="Grade 2">Grade 2</option>
-                                    <option value="Grade 3">Grade 3</option>
-                                    <option value="Grade 4">Grade 4</option>
-                                    <option value="Grade 5">Grade 5</option>
-                                    <option value="Middle School">Middle School</option>
-                                    <option value="High School">High School</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="topic">Topic</label>
-                                <input type="text" id="topic" placeholder="e.g. Photosynthesis, Fractions, Civics" required>
-                            </div>
-                        </div>
+    <main class="container">
+        <!-- Hero & Form Section -->
+        <section class="planner-header">
+            <h1>Expert Lesson Planning, <span>in Seconds.</span></h1>
+            <p>Generate structured plans and student-ready worksheets tailored to your grade and topic.</p>
+        </section>
 
-                        <button type="submit" id="generate-btn" class="btn-primary">
-                            <span class="btn-text">Generate Lesson</span>
-                            <span class="loader"></span>
-                        </button>
-                    </form>
-                </div>
-            </section>
-
-            <section id="results-section" class="results-section hidden">
-                <div class="tabs">
-                    <button class="tab-btn active" data-tab="tab-plan">Lesson Plan</button>
-                    <button class="tab-btn" data-tab="tab-worksheet">Student Worksheet</button>
-                </div>
-
-                <div class="tab-content active" id="tab-plan">
-                    <div class="card">
-                        <div id="plan-display"></div>
+        <section class="form-container">
+            <form id="lesson-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="grade">Grade Level</label>
+                        <select id="grade" required>
+                            <option value="" disabled selected>Select Grade</option>
+                            <option value="Kindergarten">Kindergarten</option>
+                            <option value="1st Grade">1st Grade</option>
+                            <option value="2nd Grade">2nd Grade</option>
+                            <option value="3rd Grade">3rd Grade</option>
+                            <option value="4th Grade">4th Grade</option>
+                            <option value="5th Grade">5th Grade</option>
+                            <option value="6th Grade">6th Grade</option>
+                            <option value="7th Grade">7th Grade</option>
+                            <option value="8th Grade">8th Grade</option>
+                            <option value="High School">High School</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="topic">Topic or Concept</label>
+                        <input type="text" id="topic" placeholder="e.g., Photosynthesis, Civil War, Fractions" required>
                     </div>
                 </div>
+                <button type="submit" id="generate-btn" class="btn-primary">
+                    <span class="btn-text">Generate Lesson</span>
+                    <span class="loader hidden"></span>
+                </button>
+            </form>
+        </section>
 
-                <div class="tab-content" id="tab-worksheet">
-                    <div class="card sheet-paper">
-                        <div id="worksheet-display"></div>
-                    </div>
+        <!-- Results Section (Hidden by default) -->
+        <section id="results-section" class="results-container hidden">
+            <div class="results-tabs">
+                <button class="tab-btn active" data-tab="teacher-plan">👨‍🏫 Teacher Plan</button>
+                <button class="tab-btn" data-tab="student-worksheet">📝 Student Worksheet</button>
+                <button id="print-btn" class="btn-secondary">Download PDF</button>
+            </div>
+
+            <div class="tab-content active" id="teacher-plan">
+                <!-- Lesson Plan content will be injected here -->
+            </div>
+
+            <div class="tab-content" id="student-worksheet">
+                <div class="printable-paper" id="worksheet-content">
+                    <!-- Worksheet content will be injected here -->
                 </div>
-            </section>
-        </main>
-    </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 LessonAI Planner. Built for Teachers.</p>
+    </footer>
 
     <script src="app.js"></script>
 </body>
+
 </html>
