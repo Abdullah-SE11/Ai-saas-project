@@ -1,9 +1,6 @@
 fastapi
 uvicorn
-python-multipart
-python-dotenv
 openai
-google-generativeai
-stripe
-firebase-admin
+python-dotenv
 pydantic
+python-multipart

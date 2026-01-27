@@ -1,22 +1,17 @@
-import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
-import stripe
 from .api import lesson
 
-# Load environment variables
-load_dotenv()
+app = FastAPI(
+    title="AI Lesson Planner API",
+    description="A modular backend for generating educational content.",
+    version="1.0.0"
+)
 
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
-stripe.api_key = STRIPE_SECRET_KEY
-
-app = FastAPI(title="AI Lesson Planner")
-
-# CORS
+# CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"], # In production, replace with your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -25,10 +20,10 @@ app.add_middleware(
 # Include Routers
 app.include_router(lesson.router)
 
-# Note: Static files for frontend are no longer served from here. 
-# Use the separate frontend directory.
+@app.get("/health")
+def health_check():
+    return {"status": "online", "service": "AI Lesson Planner"}
 
 if __name__ == "__main__":
     import uvicorn
-    # If running directly, we need to handle import paths or just use uvicorn from root
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

@@ -1,9 +1,9 @@
 from typing import List
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class LessonRequest(BaseModel):
-    grade: str
-    topic: str
+    grade: str = Field(..., example="7th Grade")
+    topic: str = Field(..., example="Photosynthesis")
 
 class LessonPlan(BaseModel):
     objectives: List[str]

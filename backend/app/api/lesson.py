@@ -1,20 +1,18 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from ..models.lesson import LessonRequest, LessonResponse
 from ..core.security import get_api_key
-from ..services.stripe_service import check_subscription
 from ..services.ai_service import generate_lesson_content
 
-router = APIRouter()
+router = APIRouter(prefix="/generate-lesson", tags=["lesson"])
 
-@router.post("/generate-lesson", response_model=LessonResponse)
-async def generate_lesson(
-    request: LessonRequest, 
-    user_key: str = Depends(get_api_key),
-    sub_info: dict = Depends(check_subscription)
+@router.post("/", response_model=LessonResponse)
+async def create_lesson(
+    request: LessonRequest,
+    api_key: str = Depends(get_api_key)
 ):
-    print(f"Generating lesson for {request.grade}: {request.topic} (Tier: {sub_info['tier']})")
-    
-    # Generate content
-    data = generate_lesson_content(request.grade, request.topic)
-    
-    return data
+    try:
+        # Business logic: Generate content via AI service
+        content = generate_lesson_content(request.grade, request.topic)
+        return content
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="AI Generation failed. Please check your API key.")
