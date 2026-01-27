@@ -32,17 +32,6 @@ def get_api_key(authorization: str = Header(None)):
 
 from ..services.stripe_service import StripeService, UsageTracker
 
-async def check_usage_limits(api_key: str = Depends(get_api_key)):
-    # In a real app, you'd look up the customer_id associated with this api_key
-    # Mocking a customer_id for demonstration
-    customer_id = "cus_mock_123" 
-    
-    tier = StripeService.get_subscription_tier(customer_id)
-    
-    if not UsageTracker.can_generate(api_key, tier):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Daily limit reached for free tier. Please upgrade to Pro."
-        )
-    
-    return {"tier": tier, "user_id": api_key}
+async def check_usage_limits():
+    """Fully free access: no API key required, no limits enforced."""
+    return {"tier": "pro", "user_id": "free_user"}

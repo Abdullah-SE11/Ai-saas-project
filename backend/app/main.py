@@ -22,9 +22,15 @@ app.add_middleware(
 async def startup_event():
     logger.info("AI Lesson Planner API is starting up...")
 
+from fastapi.staticfiles import StaticFiles
+
 # Include Routers
 app.include_router(lesson.router)
 app.include_router(webhooks.router)
+
+# Serve Frontend
+# Note: This assumes uvicorn is run from the 'backend' directory
+app.mount("/", StaticFiles(directory="../frontend", html=True), name="static")
 
 @app.get("/health")
 def health_check():

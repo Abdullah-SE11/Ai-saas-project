@@ -7,8 +7,9 @@ from ..models.lesson import LessonResponse
 
 load_dotenv()
 
-async def generate_lesson_content(grade: str, topic: str, api_key: str) -> dict:
-    client = AsyncOpenAI(api_key=api_key)
+client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+async def generate_lesson_content(grade: str, topic: str) -> dict:
     # (Prompt remains the same)
     prompt = f"""
     You are an expert curriculum designer and pedagogic specialist. Your task is to generate a high-quality, classroom-ready lesson plan and an accompanying student worksheet based on the following parameters:
@@ -49,17 +50,34 @@ async def generate_lesson_content(grade: str, topic: str, api_key: str) -> dict:
 
     try:
         logger.info(f"Generating AI content for Topic: {topic}, Grade: {grade}")
-        response = await client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {
-                    "role": "system", 
-                    "content": "You are a professional teacher's assistant that outputs only valid, structured JSON."
-                },
-                {"role": "user", "content": prompt}
-            ],
-            response_format={"type": "json_object"}
-        )
+        try:
+            response = await client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {
+                        "role": "system", 
+                        "content": "You are a professional teacher's assistant that outputs only valid, structured JSON."
+                    },
+                    {"role": "user", "content": prompt}
+                ],
+                response_format={"type": "json_object"}
+            )
+        except Exception as model_err:
+            if "model_not_found" in str(model_err) or "gpt-4o" in str(model_err):
+                logger.warning("gpt-4o not available, falling back to gpt-3.5-turbo")
+                response = await client.chat.completions.create(
+                    model="gpt-3.5-turbo-0125", # Uses the latest 3.5 turbo that supports JSON mode
+                    messages=[
+                        {
+                            "role": "system", 
+                            "content": "You are a professional teacher's assistant that outputs only valid, structured JSON."
+                        },
+                        {"role": "user", "content": prompt}
+                    ],
+                    response_format={"type": "json_object"}
+                )
+            else:
+                raise model_err
         
         raw_content = response.choices[0].message.content
         return json.loads(raw_content)

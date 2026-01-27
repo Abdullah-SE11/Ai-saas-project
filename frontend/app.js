@@ -6,28 +6,14 @@ const btnText = generateBtn.querySelector('.btn-text');
 const resultsSection = document.getElementById('results-section');
 const teacherPlan = document.getElementById('teacher-plan');
 const worksheetContent = document.getElementById('worksheet-content');
-const apiKeyInput = document.getElementById('apiKey');
-
-// Usage Stats Elements
-const usageStats = document.getElementById('usage-stats');
-const tierBadge = document.getElementById('tier-badge');
-const usesLeftText = document.getElementById('uses-left');
 
 // Tab Logic
 const tabBtns = document.querySelectorAll('.tab-btn');
 const tabContents = document.querySelectorAll('.tab-content');
 
-// Load API Key from LocalStorage
+// DOM Content Loaded (Simplified)
 document.addEventListener('DOMContentLoaded', () => {
-    const savedKey = localStorage.getItem('lesson_ai_key');
-    if (savedKey) {
-        apiKeyInput.value = savedKey;
-    }
-});
-
-// Save API Key on input
-apiKeyInput.addEventListener('input', (e) => {
-    localStorage.setItem('lesson_ai_key', e.target.value);
+    console.log("LessonAI initialized for fully free access.");
 });
 
 // Handle Tab Switching
@@ -46,13 +32,6 @@ tabBtns.forEach(btn => {
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const apiKey = apiKeyInput.value.trim();
-    if (!apiKey) {
-        alert("Please enter your API Key (Bearer Token) in the top settings bar.");
-        apiKeyInput.focus();
-        return;
-    }
-
     const grade = document.getElementById('grade').value;
     const topic = document.getElementById('topic').value;
 
@@ -61,11 +40,10 @@ form.addEventListener('submit', async (e) => {
     resultsSection.classList.add('hidden');
 
     try {
-        const response = await fetch('http://localhost:8000/generate-lesson', {
+        const response = await fetch('/generate-lesson', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ grade, topic })
         });
@@ -121,19 +99,8 @@ function setLoading(isLoading) {
 }
 
 function renderResults(data) {
-    const { lesson_plan, worksheet, tier, usage_remaining } = data;
+    const { lesson_plan, worksheet } = data;
     const topic = document.getElementById('topic').value;
-
-    // Update Usage Stats in Navbar
-    usageStats.classList.remove('hidden');
-    tierBadge.textContent = tier;
-    tierBadge.className = `badge ${tier.toLowerCase()}`;
-
-    if (tier === 'pro') {
-        usesLeftText.textContent = 'Unlimited access';
-    } else {
-        usesLeftText.textContent = `${usage_remaining} credits left`;
-    }
 
     // 1. Render Teacher Plan
     teacherPlan.innerHTML = `
