@@ -1,14 +1,15 @@
 import os
 import json
-from openai import OpenAI
-from dotenv import load_dotenv
+from openai import AsyncOpenAI
+from ..core.logging import logger
 from ..models.lesson import LessonResponse
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def generate_lesson_content(grade: str, topic: str) -> dict:
+async def generate_lesson_content(grade: str, topic: str) -> dict:
+    # (Prompt remains the same, omitted for brevity in chunk but included in implementation)
     prompt = f"""
     You are an expert curriculum designer and pedagogic specialist. Your task is to generate a high-quality, classroom-ready lesson plan and an accompanying student worksheet based on the following parameters:
 
@@ -47,7 +48,8 @@ def generate_lesson_content(grade: str, topic: str) -> dict:
     """
 
     try:
-        response = client.chat.completions.create(
+        logger.info(f"Generating AI content for Topic: {topic}, Grade: {grade}")
+        response = await client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {
@@ -62,5 +64,5 @@ def generate_lesson_content(grade: str, topic: str) -> dict:
         raw_content = response.choices[0].message.content
         return json.loads(raw_content)
     except Exception as e:
-        print(f"AI Service Error: {str(e)}")
+        logger.error(f"AI Generation failed: {str(e)}")
         raise e

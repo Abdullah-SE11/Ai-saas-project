@@ -1,7 +1,8 @@
 import os
 import stripe
-from typing import Optional
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
+from ..core.logging import logger
 
 load_dotenv()
 
@@ -9,9 +10,10 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 PRO_PRICE_ID = os.getenv("STRIPE_PRO_PRICE_ID")
 
 class StripeService:
+    _tier_cache = {} # { "customer_id": {"tier": "pro", "expiry": datetime} }
+
     @staticmethod
     def create_checkout_session(customer_email: str, success_url: str, cancel_url: str):
-        """Create a Stripe Checkout session for a subscription."""
         try:
             session = stripe.checkout.Session.create(
                 customer_email=customer_email,
@@ -26,42 +28,58 @@ class StripeService:
             )
             return session.url
         except Exception as e:
-            print(f"Stripe Error: {e}")
+            logger.error(f"Stripe Checkout Error: {str(e)}")
             return None
 
-    @staticmethod
-    def get_subscription_tier(customer_id: str) -> str:
-        """Fetch customer subscription status from Stripe."""
-        if not customer_id:
-            return "free"
-            
+    @classmethod
+    def get_subscription_tier(cls, customer_id: str) -> str:
+        # Check cache (TTL 30 minutes)
+        now = datetime.now()
+        if customer_id in cls._tier_cache:
+            cache_entry = cls._tier_cache[customer_id]
+            if now < cache_entry["expiry"]:
+                return cache_entry["tier"]
+
         try:
-            customer = stripe.Customer.retrieve(
-                customer_id, 
-                expand=['subscriptions']
-            )
+            logger.info(f"Fetching subscription tier for: {customer_id}")
+            customer = stripe.Customer.retrieve(customer_id, expand=['subscriptions'])
             subscriptions = customer.get('subscriptions', {}).get('data', [])
             
+            tier = "free"
             for sub in subscriptions:
                 if sub.status == 'active':
-                    return "pro"
-            return "free"
-        except Exception:
+                    tier = "pro"
+                    break
+            
+            # Update cache
+            cls._tier_cache[customer_id] = {
+                "tier": tier,
+                "expiry": now + timedelta(minutes=30)
+            }
+            return tier
+        except Exception as e:
+            logger.error(f"Stripe Retrieval Error: {str(e)}")
             return "free"
 
-# Mock Usage tracker (Replace with Redis or DB in production)
 class UsageTracker:
-    _usage = {} # { "user_id": { "count": 0, "date": "2024-01-27" } }
-    FREE_LIMIT = 3
+    _usage = {}
+    FREE_LIMIT = 5 # bumped from 3 for better UX
 
     @classmethod
     def can_generate(cls, user_id: str, tier: str) -> bool:
         if tier == "pro":
             return True
         
-        count = cls._usage.get(user_id, 0)
-        return count < cls.FREE_LIMIT
+        user_usage = cls._usage.get(user_id, 0)
+        return user_usage < cls.FREE_LIMIT
+
+    @classmethod
+    def get_remaining_uses(cls, user_id: str, tier: str) -> int:
+        if tier == "pro":
+            return 999
+        return max(0, cls.FREE_LIMIT - cls._usage.get(user_id, 0))
 
     @classmethod
     def increment_usage(cls, user_id: str):
         cls._usage[user_id] = cls._usage.get(user_id, 0) + 1
+        logger.info(f"Usage incremented for {user_id}. New count: {cls._usage[user_id]}")

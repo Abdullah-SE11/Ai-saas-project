@@ -12,12 +12,20 @@ async def create_lesson(
     user_data: dict = Depends(check_usage_limits)
 ):
     try:
-        # Business logic: Generate content via AI service
-        content = generate_lesson_content(request.grade, request.topic)
+        # Generate content
+        content = await generate_lesson_content(request.grade, request.topic)
         
-        # Increment usage count
+        # Increment usage
         UsageTracker.increment_usage(user_data["user_id"])
         
-        return content
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="AI Generation failed. Please check your API key.")
+        # Build response with metadata
+        return {
+            **content,
+            "tier": user_data["tier"],
+            "usage_remaining": UsageTracker.get_remaining_uses(user_data["user_id"], user_data["tier"])
+        }
+    except Exception:
+        raise HTTPException(
+            status_code=500, 
+            detail="AI Generation failed. Please try again later or check your API key."
+        )

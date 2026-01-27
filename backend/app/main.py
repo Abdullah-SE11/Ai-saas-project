@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .api import lesson, webhooks
+from .core.logging import logger
 
 app = FastAPI(
     title="AI Lesson Planner API",
@@ -8,14 +9,18 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS Configuration
+# CORS Configuration - Restricted for security
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, replace with your frontend URL
+    allow_origins=["http://localhost:5500", "http://127.0.0.1:5500", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("AI Lesson Planner API is starting up...")
 
 # Include Routers
 app.include_router(lesson.router)

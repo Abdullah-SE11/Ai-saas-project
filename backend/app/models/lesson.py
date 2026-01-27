@@ -19,3 +19,5 @@ class Worksheet(BaseModel):
 class LessonResponse(BaseModel):
     lesson_plan: LessonPlan
     worksheet: Worksheet
+    tier: str
+    usage_remaining: int
