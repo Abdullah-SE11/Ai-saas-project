@@ -13,8 +13,9 @@ class LessonPlan(BaseModel):
 
 class Worksheet(BaseModel):
     instructions: str
-    questions: List[str]
-    answer_key: List[str]
+    mcqs: List[dict] = [] # [{"q": "...", "o": ["a","b","c","d"], "a": "..."}]
+    fill_blanks: List[dict] = [] # [{"q": "The ___ is blue.", "a": "sky"}]
+    short_questions: List[dict] = [] # [{"q": "...", "a": "..."}]
 
 class LessonResponse(BaseModel):
     lesson_plan: LessonPlan

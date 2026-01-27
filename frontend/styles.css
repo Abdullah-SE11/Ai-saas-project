@@ -407,3 +407,38 @@ body {
         padding: 0;
     }
 }
+
+/* Extra Lab Styles */
+.sheet-section {
+    margin-bottom: 32px;
+}
+
+.sheet-section h4 {
+    color: #0D9488;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 8px;
+    padding-left: 20px;
+}
+
+.lab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.lab-card {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 4px solid #0D9488;
+}
