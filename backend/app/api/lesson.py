@@ -13,7 +13,11 @@ async def create_lesson(
 ):
     try:
         # Generate content
-        content = await generate_lesson_content(request.grade, request.topic)
+        content = await generate_lesson_content(
+            request.grade, 
+            request.topic, 
+            user_data["user_id"]
+        )
         
         # Increment usage
         UsageTracker.increment_usage(user_data["user_id"])

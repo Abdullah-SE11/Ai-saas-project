@@ -82,15 +82,32 @@ form.addEventListener('submit', async (e) => {
     }
 });
 
+const loadingMessages = [
+    "Drafting educational objectives...",
+    "Building student worksheet...",
+    "Adapting to grade level...",
+    "Finalizing lesson activities...",
+    "Formatting for print..."
+];
+
+let loadingInterval;
+
 function setLoading(isLoading) {
     if (isLoading) {
         generateBtn.disabled = true;
         loader.classList.remove('hidden');
-        btnText.textContent = 'Expertly Planning...';
+
+        let i = 0;
+        btnText.textContent = loadingMessages[0];
+        loadingInterval = setInterval(() => {
+            i = (i + 1) % loadingMessages.length;
+            btnText.textContent = loadingMessages[i];
+        }, 2000);
     } else {
         generateBtn.disabled = false;
         loader.classList.add('hidden');
         btnText.textContent = 'Generate Lesson';
+        clearInterval(loadingInterval);
     }
 }
 

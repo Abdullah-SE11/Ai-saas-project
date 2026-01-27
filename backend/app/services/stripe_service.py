@@ -33,6 +33,9 @@ class StripeService:
 
     @classmethod
     def get_subscription_tier(cls, customer_id: str) -> str:
+        if not stripe.api_key:
+            return "free"
+            
         # Check cache (TTL 30 minutes)
         now = datetime.now()
         if customer_id in cls._tier_cache:

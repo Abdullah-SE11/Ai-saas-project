@@ -1,15 +1,15 @@
 import os
 import json
 from openai import AsyncOpenAI
+from dotenv import load_dotenv
 from ..core.logging import logger
 from ..models.lesson import LessonResponse
 
 load_dotenv()
 
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-async def generate_lesson_content(grade: str, topic: str) -> dict:
-    # (Prompt remains the same, omitted for brevity in chunk but included in implementation)
+async def generate_lesson_content(grade: str, topic: str, api_key: str) -> dict:
+    client = AsyncOpenAI(api_key=api_key)
+    # (Prompt remains the same)
     prompt = f"""
     You are an expert curriculum designer and pedagogic specialist. Your task is to generate a high-quality, classroom-ready lesson plan and an accompanying student worksheet based on the following parameters:
 
