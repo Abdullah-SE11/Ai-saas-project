@@ -36,7 +36,7 @@ form.addEventListener('submit', async (e) => {
     const topic = document.getElementById('topic').value;
 
     try {
-        const response = await fetch('/generate-lesson', {
+        const response = await fetch('http://localhost:8000/generate-lesson', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
