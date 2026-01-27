@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .api import lesson
+from .api import lesson, webhooks
 
 app = FastAPI(
     title="AI Lesson Planner API",
@@ -19,6 +19,7 @@ app.add_middleware(
 
 # Include Routers
 app.include_router(lesson.router)
+app.include_router(webhooks.router)
 
 @app.get("/health")
 def health_check():
