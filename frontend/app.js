@@ -8,6 +8,11 @@ const teacherPlan = document.getElementById('teacher-plan');
 const worksheetContent = document.getElementById('worksheet-content');
 const apiKeyInput = document.getElementById('apiKey');
 
+// Usage Stats Elements
+const usageStats = document.getElementById('usage-stats');
+const tierBadge = document.getElementById('tier-badge');
+const usesLeftText = document.getElementById('uses-left');
+
 // Tab Logic
 const tabBtns = document.querySelectorAll('.tab-btn');
 const tabContents = document.querySelectorAll('.tab-content');
@@ -67,6 +72,10 @@ form.addEventListener('submit', async (e) => {
 
         if (!response.ok) {
             const errorData = await response.json();
+            if (response.status === 403) {
+                alert("🌟 Daily limit reached for your free account! Please upgrade to Pro for unlimited planning.");
+                // Optionally redirect to checkout here
+            }
             throw new Error(errorData.detail || 'Failed to generate lesson.');
         }
 
@@ -112,8 +121,19 @@ function setLoading(isLoading) {
 }
 
 function renderResults(data) {
-    const { lesson_plan, worksheet } = data;
+    const { lesson_plan, worksheet, tier, usage_remaining } = data;
     const topic = document.getElementById('topic').value;
+
+    // Update Usage Stats in Navbar
+    usageStats.classList.remove('hidden');
+    tierBadge.textContent = tier;
+    tierBadge.className = `badge ${tier.toLowerCase()}`;
+
+    if (tier === 'pro') {
+        usesLeftText.textContent = 'Unlimited access';
+    } else {
+        usesLeftText.textContent = `${usage_remaining} credits left`;
+    }
 
     // 1. Render Teacher Plan
     teacherPlan.innerHTML = `

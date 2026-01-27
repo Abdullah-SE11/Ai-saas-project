@@ -67,7 +67,36 @@ body {
 .settings {
     display: flex;
     align-items: center;
+    gap: 20px;
+}
+
+.usage-stats {
+    display: flex;
+    align-items: center;
     gap: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: var(--border);
+    color: var(--text-main);
+}
+
+.badge.pro {
+    background: #FEF3C7;
+    color: #D97706;
+}
+
+.badge.free {
+    background: #E0F2FE;
+    color: #0369A1;
 }
 
 .settings input {
