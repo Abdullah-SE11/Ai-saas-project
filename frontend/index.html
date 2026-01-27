@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Lesson Planner</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <h1>LessonGenius <small>AI</small></h1>
+            </div>
+            <p>Generate production-ready lesson plans & worksheets in seconds.</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <div class="card glass">
+                    <h2>Configuration</h2>
+                    <form id="lesson-form">
+                        <div class="form-group">
+                            <label for="apiKey">API Key <small>(Simulated Auth)</small></label>
+                            <input type="password" id="apiKey" placeholder="sk-..." value="paid_test_key_123" required>
+                            <small class="hint">Use "paid_..." to simulate pro tier</small>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="grade">Grade Level</label>
+                                <select id="grade" required>
+                                    <option value="" disabled selected>Select Grade</option>
+                                    <option value="Kindergarten">Kindergarten</option>
+                                    <option value="Grade 1">Grade 1</option>
+                                    <option value="Grade 2">Grade 2</option>
+                                    <option value="Grade 3">Grade 3</option>
+                                    <option value="Grade 4">Grade 4</option>
+                                    <option value="Grade 5">Grade 5</option>
+                                    <option value="Middle School">Middle School</option>
+                                    <option value="High School">High School</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="topic">Topic</label>
+                                <input type="text" id="topic" placeholder="e.g. Photosynthesis, Fractions, Civics" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="generate-btn" class="btn-primary">
+                            <span class="btn-text">Generate Lesson</span>
+                            <span class="loader"></span>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="results-section" class="results-section hidden">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="tab-plan">Lesson Plan</button>
+                    <button class="tab-btn" data-tab="tab-worksheet">Student Worksheet</button>
+                </div>
+
+                <div class="tab-content active" id="tab-plan">
+                    <div class="card">
+                        <div id="plan-display"></div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="tab-worksheet">
+                    <div class="card sheet-paper">
+                        <div id="worksheet-display"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
