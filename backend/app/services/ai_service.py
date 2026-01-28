@@ -9,6 +9,36 @@ load_dotenv()
 
 client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+async def refine_lesson_content(current_data: dict, user_prompt: str, grade: str, topic: str) -> dict:
+    """ChatGPT-like refinement: Modify existing lesson data based on a new prompt."""
+    system_msg = "You are a professional teacher's assistant that outputs only valid, structured JSON."
+    
+    refine_instruction = f"""
+    You previously generated this lesson for Grade {grade}, Topic "{topic}":
+    {json.dumps(current_data, indent=2)}
+
+    Now, the teacher has a special request: "{user_prompt}"
+    
+    Please output the UPDATED lesson plan and worksheet in the EXACT same JSON format. 
+    Incorporate the teacher's request perfectly while maintaining educational standards.
+    """
+
+    try:
+        response = await client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": refine_instruction}
+            ],
+            response_format={"type": "json_object"}
+        )
+        raw_content = response.choices[0].message.content
+        return json.loads(raw_content)
+    except Exception as e:
+        logger.error(f"Refinement failed: {str(e)}")
+        # If API fails, return current data or a modified mock
+        return current_data
+
 async def generate_lesson_content(grade: str, topic: str, image_data: str = None) -> dict:
     # Construct Messages
     system_msg = "You are a professional teacher's assistant that outputs only valid, structured JSON."

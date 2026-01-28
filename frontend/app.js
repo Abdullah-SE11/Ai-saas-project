@@ -1,6 +1,11 @@
 // DOM Elements
 const form = document.getElementById('lesson-form');
 const generateBtn = document.getElementById('generate-btn');
+const aiRefiner = document.getElementById('ai-refiner');
+const refinerInput = document.getElementById('refiner-query');
+const refineBtn = document.getElementById('refine-btn');
+
+let currentLessonData = null; // Store for refinement requests
 const loader = generateBtn.querySelector('.loader');
 const btnText = generateBtn.querySelector('.btn-text');
 const resultsSection = document.getElementById('results-section');
@@ -113,8 +118,10 @@ form.addEventListener('submit', async (e) => {
         }
 
         const data = await response.json();
+        currentLessonData = data; // Save for refiner
         renderResults(data);
         resultsSection.classList.remove('hidden');
+        aiRefiner.classList.remove('hidden'); // Show ChatGPT box
         resultsSection.scrollIntoView({ behavior: 'smooth' });
 
     } catch (err) {
@@ -260,3 +267,51 @@ function renderResults(data) {
 document.getElementById('print-btn').addEventListener('click', () => {
     window.print();
 });
+
+// ChatGPT Style Refinement Logic
+refineBtn.addEventListener('click', async () => {
+    const prompt = refinerInput.value.trim();
+    if (!prompt) return;
+
+    setRefineLoading(true);
+
+    try {
+        const payload = {
+            current_data: currentLessonData,
+            prompt: prompt,
+            grade: document.getElementById('grade').value,
+            topic: document.getElementById('topic').value
+        };
+
+        const response = await fetch('/generate-lesson/refine', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error('Refinement failed.');
+
+        const data = await response.json();
+        currentLessonData = data;
+        renderResults(data);
+        refinerInput.value = ''; // Reset input
+
+    } catch (err) {
+        alert(err.message);
+    } finally {
+        setRefineLoading(false);
+    }
+});
+
+function setRefineLoading(isLoading) {
+    const text = refineBtn.querySelector('.refine-text');
+    const load = refineBtn.querySelector('.refine-loader');
+    refineBtn.disabled = isLoading;
+    if (isLoading) {
+        if (text) text.classList.add('hidden');
+        if (load) load.classList.remove('hidden');
+    } else {
+        if (text) text.classList.remove('hidden');
+        if (load) load.classList.add('hidden');
+    }
+}

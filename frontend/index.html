@@ -104,6 +104,21 @@
                     <!-- Question Lab content will be injected here -->
                 </div>
             </div>
+
+            <!-- New: Dynamic AI Refiner (ChatGPT Style) -->
+            <div id="ai-refiner" class="ai-refiner-section hidden">
+                <div class="refiner-header">
+                    <span>✨ AI Assistant: Want to change something?</span>
+                </div>
+                <div class="refiner-input-group">
+                    <input type="text" id="refiner-query"
+                        placeholder="e.g., 'Add 3 more hard math questions' or 'Make it more creative'...">
+                    <button id="refine-btn" class="btn-primary">
+                        <span class="refine-text">Ask AI</span>
+                        <div class="refine-loader hidden"></div>
+                    </button>
+                </div>
+            </div>
         </section>
     </main>
 

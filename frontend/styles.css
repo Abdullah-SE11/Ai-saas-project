@@ -510,6 +510,43 @@ body {
 }
 
 /* Extra Lab Styles */
+.ai-refiner-section {
+    margin-top: 40px;
+    padding: 30px;
+    background: #0F172A;
+    border-radius: 12px;
+    color: white;
+    display: block;
+}
+
+.ai-refiner-section.hidden {
+    display: none;
+}
+
+.refiner-input-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.refiner-input-group input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    background: #1E293B;
+    color: white;
+    border: 1px solid #334155;
+}
+
+#refine-btn {
+    background: #0D9488;
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
 .sheet-section {
     margin-bottom: 32px;
 }

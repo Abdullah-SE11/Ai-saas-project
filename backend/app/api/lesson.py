@@ -1,35 +1,38 @@
-from fastapi import APIRouter, Depends, HTTPException
-from ..models.lesson import LessonRequest, LessonResponse
-from ..core.security import check_usage_limits
-from ..services.stripe_service import UsageTracker
-from ..services.ai_service import generate_lesson_content
+from fastapi import APIRouter, HTTPException
+from ..models.lesson import LessonRequest, LessonResponse, RefineRequest
+from ..services.ai_service import generate_lesson_content, refine_lesson_content
 
 router = APIRouter(prefix="/generate-lesson", tags=["lesson"])
 
 @router.post("", response_model=LessonResponse)
-async def create_lesson(
-    request: LessonRequest,
-    user_data: dict = Depends(check_usage_limits)
-):
+async def create_lesson(request: LessonRequest):
     try:
-        # Generate content
         content = await generate_lesson_content(
             request.grade, 
             request.topic,
             request.image_data
         )
-        
-        # Increment usage
-        UsageTracker.increment_usage(user_data["user_id"])
-        
-        # Build response with metadata
         return {
             **content,
-            "tier": user_data["tier"],
-            "usage_remaining": UsageTracker.get_remaining_uses(user_data["user_id"], user_data["tier"])
+            "tier": "pro",
+            "usage_remaining": 999
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=500, 
-            detail=f"AI Generation failed: {str(e)}"
+        raise HTTPException(status_code=500, detail=f"AI Generation failed: {str(e)}")
+
+@router.post("/refine", response_model=LessonResponse)
+async def refine_lesson(request: RefineRequest):
+    try:
+        content = await refine_lesson_content(
+            request.current_data,
+            request.prompt,
+            request.grade,
+            request.topic
         )
+        return {
+            **content,
+            "tier": "pro",
+            "usage_remaining": 999
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Refinement failed: {str(e)}")

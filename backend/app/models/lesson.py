@@ -23,3 +23,9 @@ class LessonResponse(BaseModel):
     worksheet: Worksheet
     tier: str
     usage_remaining: int
+
+class RefineRequest(BaseModel):
+    current_data: dict # The existing lesson/worksheet JSON
+    prompt: str # The user's refinement instruction (e.g. "make it harder")
+    grade: str
+    topic: str
