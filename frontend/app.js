@@ -6,6 +6,13 @@ const btnText = generateBtn.querySelector('.btn-text');
 const resultsSection = document.getElementById('results-section');
 const teacherPlan = document.getElementById('teacher-plan');
 const worksheetContent = document.getElementById('worksheet-content');
+const visionInput = document.getElementById('vision-input');
+const dropArea = document.getElementById('drop-area');
+const filePreview = document.getElementById('file-preview');
+const previewImg = document.getElementById('preview-img');
+const removeImgBtn = document.getElementById('remove-img');
+
+let base64Image = null;
 
 // Tab Logic
 const tabBtns = document.querySelectorAll('.tab-btn');
@@ -14,6 +21,48 @@ const tabContents = document.querySelectorAll('.tab-content');
 // DOM Content Loaded (Simplified)
 document.addEventListener('DOMContentLoaded', () => {
     console.log("LessonAI initialized for fully free access.");
+});
+
+// Handle Image Selection
+visionInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) handleFile(file);
+});
+
+// Drag & Drop
+['dragenter', 'dragover'].forEach(name => {
+    dropArea.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropArea.classList.add('dragover');
+    });
+});
+['dragleave', 'drop'].forEach(name => {
+    dropArea.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('dragover');
+    });
+});
+dropArea.addEventListener('drop', (e) => {
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+        handleFile(file);
+    }
+});
+
+function handleFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        base64Image = e.target.result;
+        previewImg.src = base64Image;
+        filePreview.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+}
+
+removeImgBtn.addEventListener('click', () => {
+    base64Image = null;
+    visionInput.value = '';
+    filePreview.classList.add('hidden');
 });
 
 // Handle Tab Switching
@@ -40,12 +89,18 @@ form.addEventListener('submit', async (e) => {
     resultsSection.classList.add('hidden');
 
     try {
+        const payload = {
+            grade,
+            topic,
+            image_data: base64Image
+        };
+
         const response = await fetch('/generate-lesson', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ grade, topic })
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
@@ -187,15 +242,15 @@ function renderResults(data) {
         <div class="lab-grid">
             <div class="lab-card">
                 <h4>Multiple Choice Answers</h4>
-                <ul>${(worksheet.mcqs || []).map(m => `<li><strong>Q:</strong> ${m.q}<br><strong>A:</strong> ${m.a}</li>`).join('')}</ul>
+                <ul>${(worksheet.mcqs || []).map(m => `<li><strong>Q:</strong> ${m.q}<br><strong>A:</strong> ${m.a}<br><small><em>Why: ${m.explanation || 'Direct answer.'}</em></small></li>`).join('')}</ul>
             </div>
             <div class="lab-card">
                 <h4>Fill in the Blanks Key</h4>
-                <ul>${(worksheet.fill_blanks || []).map(fb => `<li><strong>Q:</strong> ${fb.q}<br><strong>Key:</strong> ${fb.a}</li>`).join('')}</ul>
+                <ul>${(worksheet.fill_blanks || []).map(fb => `<li><strong>Q:</strong> ${fb.q}<br><strong>Key:</strong> ${fb.a}<br><small><em>Context: ${fb.explanation || 'Key vocabulary.'}</em></small></li>`).join('')}</ul>
             </div>
             <div class="lab-card">
                 <h4>Short Question Guide</h4>
-                <ul>${(worksheet.short_questions || []).map(sq => `<li><strong>Q:</strong> ${sq.q}<br><strong>Guide:</strong> ${sq.a}</li>`).join('')}</ul>
+                <ul>${(worksheet.short_questions || []).map(sq => `<li><strong>Q:</strong> ${sq.q}<br><strong>Guide:</strong> ${sq.a}<br><small><em>Teaching Point: ${sq.explanation || 'Core concept check.'}</em></small></li>`).join('')}</ul>
             </div>
         </div>
     `;

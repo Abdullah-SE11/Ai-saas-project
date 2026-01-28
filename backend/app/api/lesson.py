@@ -15,7 +15,8 @@ async def create_lesson(
         # Generate content
         content = await generate_lesson_content(
             request.grade, 
-            request.topic
+            request.topic,
+            request.image_data
         )
         
         # Increment usage

@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 class LessonRequest(BaseModel):
     grade: str = Field(..., example="7th Grade")
     topic: str = Field(..., example="Photosynthesis")
+    image_data: str = None # Base64 encoded image
 
 class LessonPlan(BaseModel):
     objectives: List[str]

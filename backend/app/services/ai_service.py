@@ -9,16 +9,18 @@ load_dotenv()
 
 client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-async def generate_lesson_content(grade: str, topic: str) -> dict:
-    # (Prompt remains the same)
+async def generate_lesson_content(grade: str, topic: str, image_data: str = None) -> dict:
+    # Construct Messages
+    system_msg = "You are a professional teacher's assistant that outputs only valid, structured JSON."
+    
+    # Base Prompt
     prompt = f"""
-    You are an expert curriculum designer and pedagogic specialist. Your task is to generate a high-quality, classroom-ready lesson plan and an accompanying student worksheet based on the following parameters:
-
+    You are an expert curriculum designer. Generate a high-quality lesson plan and worksheet for:
     Grade Level: {grade}
-    Topic: {topic}
+    Defined Topic: {topic}
 
-    Act strictly as a structured data generator. Your output must be a single, valid JSON object that adapts its vocabulary, pedagogical depth, and task complexity specifically for the {grade} level.
-
+    If an image is provided, it contains the source material (textbook, notes). Extract the key information and use it to build the lesson.
+    
     Educational Requirements:
     1. Lesson Objectives: Clear, grade-appropriate measurable goals.
     2. Materials: Resources needed.
@@ -28,54 +30,56 @@ async def generate_lesson_content(grade: str, topic: str) -> dict:
        - MCQs: 3 multiple choice questions with 4 options each.
        - Fill in the Blanks: 3 sentences with a "___" and the missing word.
        - Short Questions: 3 conceptual questions.
-    6. Special Math Instruction: If the topic is Mathematics, ensure activities include step-by-step problem-solving demonstrations and questions focus on varied difficulty levels.
+    6. Special Math Instruction: Focus on step-by-step problem-solving if math-related.
 
     JSON Schema Constraint:
     {{
-      "lesson_plan": {{
-        "objectives": ["string"],
-        "materials": ["string"],
-        "activities": ["string"],
-        "assessment": "string"
-      }},
+      "lesson_plan": {{ "objectives": ["string"], "materials": ["string"], "activities": ["string"], "assessment": "string" }},
       "worksheet": {{
         "instructions": "string",
-        "mcqs": [{{ "q": "string", "o": ["string"], "a": "string" }}],
-        "fill_blanks": [{{ "q": "string", "a": "string" }}],
-        "short_questions": [{{ "q": "string", "a": "string" }}]
+        "mcqs": [{{ "q": "string", "o": ["string"], "a": "string", "explanation": "string" }}],
+        "fill_blanks": [{{ "q": "string", "a": "string", "explanation": "string" }}],
+        "short_questions": [{{ "q": "string", "a": "string", "explanation": "string" }}]
       }}
     }}
-
-    Strict Constraints:
-    - Output ONLY valid JSON.
-    - Deliver ONLY the JSON object. No preamble or conversational text.
-    - Ensure all content is factually accurate and safe for a classroom environment.
     """
 
+    messages = [
+        {"role": "system", "content": system_msg},
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": prompt}
+            ]
+        }
+    ]
+
+    # Add Image if present
+    if image_data:
+        # image_data is data:image/png;base64,.... we need to strip the prefix
+        if "," in image_data:
+            image_data = image_data.split(",")[1]
+        
+        messages[1]["content"].append({
+            "type": "image_url",
+            "image_url": {"url": f"data:image/jpeg;base64,{image_data}"}
+        })
+
     try:
-        logger.info(f"Generating AI content for Topic: {topic}, Grade: {grade}")
+        logger.info(f"Generating AI content (Vision={bool(image_data)}) for {topic}")
         try:
             response = await client.chat.completions.create(
                 model="gpt-4o",
-                messages=[
-                    {
-                        "role": "system", 
-                        "content": "You are a professional teacher's assistant that outputs only valid, structured JSON."
-                    },
-                    {"role": "user", "content": prompt}
-                ],
+                messages=messages,
                 response_format={"type": "json_object"}
             )
         except Exception as model_err:
             if "model_not_found" in str(model_err) or "gpt-4o" in str(model_err):
-                logger.warning("gpt-4o not available, falling back to gpt-3.5-turbo")
+                logger.warning("gpt-4o not available, falling back to gpt-3.5-turbo (Text only)")
                 response = await client.chat.completions.create(
-                    model="gpt-3.5-turbo-0125", # Uses the latest 3.5 turbo that supports JSON mode
+                    model="gpt-3.5-turbo-0125",
                     messages=[
-                        {
-                            "role": "system", 
-                            "content": "You are a professional teacher's assistant that outputs only valid, structured JSON."
-                        },
+                        {"role": "system", "content": system_msg},
                         {"role": "user", "content": prompt}
                     ],
                     response_format={"type": "json_object"}
@@ -118,32 +122,32 @@ def get_mock_lesson(grade: str, topic: str) -> dict:
     worksheet = {
         "instructions": f"Complete the following questions about {topic}. Show your work where required.",
         "mcqs": [
-            {"q": f"What is the primary characteristic of {topic}?", "o": ["Option A", "Option B", "Option C", "Option D"], "a": "Option A"},
-            {"q": f"Which of these relates most to {topic}?", "o": ["Concept X", "Concept Y", "Concept Z", "Concept W"], "a": "Concept Y"},
-            {"q": f"At the {grade} level, how is {topic} typically handled?", "o": ["Simplified", "Standard", "Advanced", "Variable"], "a": "Standard"}
+            {"q": f"What is the primary characteristic of {topic}?", "o": ["Option A", "Option B", "Option C", "Option D"], "a": "Option A", "explanation": "Foundational concept."},
+            {"q": f"Which of these relates most to {topic}?", "o": ["Concept X", "Concept Y", "Concept Z", "Concept W"], "a": "Concept Y", "explanation": "Common association."},
+            {"q": f"At the {grade} level, how is {topic} typically handled?", "o": ["Simplified", "Standard", "Advanced", "Variable"], "a": "Standard", "explanation": "Age-appropriate depth."}
         ],
         "fill_blanks": [
-            {"q": f"In {grade}, {topic} is often defined as the process of ___.", "a": "discovery"},
-            {"q": f"One key rule of {topic} is that you must always ___.", "a": "check work"},
-            {"q": f"The opposite of {topic} in some contexts is ___.", "a": "inversion"}
+            {"q": f"In {grade}, {topic} is often defined as the process of ___.", "a": "discovery", "explanation": "Key verb."},
+            {"q": f"One key rule of {topic} is that you must always ___.", "a": "check work", "explanation": "Best practice."},
+            {"q": f"The opposite of {topic} in some contexts is ___.", "a": "inversion", "explanation": "Conceptual contrast."}
         ],
         "short_questions": [
-            {"q": f"Describe one real-world application of {topic}.", "a": "Answers will vary but should relate to industry or nature."},
-            {"q": f"Why is {topic} important for {grade} students to learn?", "a": "It builds foundational logic and specialized skills."},
-            {"q": f"Explain the main difference between {topic} and related concepts.", "a": "Focused on precision and application."}
+            {"q": f"Describe one real-world application of {topic}.", "a": "Answers will vary but should relate to industry or nature.", "explanation": "Contextual application."},
+            {"q": f"Why is {topic} important for {grade} students to learn?", "a": "It builds foundational logic and specialized skills.", "explanation": "Educational value."},
+            {"q": f"Explain the main difference between {topic} and related concepts.", "a": "Focused on precision and application.", "explanation": "Nuance check."}
         ]
     }
 
     if is_math:
         worksheet["mcqs"] = [
-            {"q": f"Solve for x in a simple {topic} equation.", "o": ["10", "20", "30", "40"], "a": "20"},
-            {"q": f"What is the first step in solving a {topic} problem?", "o": ["Identify variables", "Guess", "Ignore signs", "None"], "a": "Identify variables"},
-            {"q": f"Which operation is most common in {topic}?", "o": ["Addition", "Variable", "Mixed", "Constant"], "a": "Variable"}
+            {"q": f"Solve for x in a simple {topic} equation.", "o": ["10", "20", "30", "40"], "a": "20", "explanation": "Basic algebraic isolation."},
+            {"q": f"What is the first step in solving a {topic} problem?", "o": ["Identify variables", "Guess", "Ignore signs", "None"], "a": "Identify variables", "explanation": "Standard procedure."},
+            {"q": f"Which operation is most common in {topic}?", "o": ["Addition", "Variable", "Mixed", "Constant"], "a": "Variable", "explanation": "Core component."}
         ]
         worksheet["fill_blanks"] = [
-            {"q": "The sum of a basic equation is called the ___.", "a": "result"},
-            {"q": "A placeholder in math is often called a ___.", "a": "variable"},
-            {"q": "In geometry, the distance around a shape is the ___.", "a": "perimeter"}
+            {"q": "The sum of a basic equation is called the ___.", "a": "result", "explanation": "Terminology."},
+            {"q": "A placeholder in math is often called a ___.", "a": "variable", "explanation": "Primary definition."},
+            {"q": "In geometry, the distance around a shape is the ___.", "a": "perimeter", "explanation": "Geometric property."}
         ]
 
     return {

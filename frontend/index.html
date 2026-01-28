@@ -57,6 +57,22 @@
                         <input type="text" id="topic" placeholder="e.g., Photosynthesis, Civil War, Fractions" required>
                     </div>
                 </div>
+
+                <div class="vision-upload-section">
+                    <div class="upload-label">
+                        <span>📸 <strong>Optional:</strong> Auto-generate from Image</span>
+                        <p>Upload a textbook page or handwritten notes for even more precision.</p>
+                    </div>
+                    <div class="file-drop-area" id="drop-area">
+                        <span class="fake-btn">Choose File</span>
+                        <span class="file-msg">or drag and drop here</span>
+                        <input class="file-input" type="file" id="vision-input" accept="image/*">
+                    </div>
+                    <div id="file-preview" class="file-preview hidden">
+                        <img id="preview-img" src="" alt="Preview">
+                        <button type="button" id="remove-img" class="remove-btn">✕</button>
+                    </div>
+                </div>
                 <button type="submit" id="generate-btn" class="btn-primary">
                     <span class="btn-text">Generate Lesson</span>
                     <span class="loader hidden"></span>

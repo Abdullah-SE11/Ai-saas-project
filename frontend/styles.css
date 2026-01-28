@@ -289,6 +289,107 @@ body {
     display: block;
 }
 
+/* Vision Upload Section */
+.vision-upload-section {
+    margin-top: 24px;
+    padding: 20px;
+    background: #F8FAFC;
+    border-radius: 12px;
+    border: 1px dashed #E2E8F0;
+}
+
+.upload-label {
+    margin-bottom: 12px;
+}
+
+.upload-label span {
+    display: block;
+    color: var(--primary);
+    font-size: 0.95rem;
+}
+
+.upload-label p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.file-drop-area {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px;
+    border: 2px dashed #CBD5E1;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.file-drop-area.dragover {
+    background: #F0FDFA;
+    border-color: var(--accent);
+}
+
+.fake-btn {
+    padding: 8px 16px;
+    background: #E2E8F0;
+    color: var(--primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+.file-msg {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.file-input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-preview {
+    margin-top: 16px;
+    position: relative;
+    display: inline-block;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.file-preview img {
+    height: 120px;
+    display: block;
+}
+
+.remove-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: background 0.2s;
+}
+
+.remove-btn:hover {
+    background: #EF4444;
+}
+
 /* Teacher Plan Styling */
 .plan-section {
     margin-bottom: 30px;
