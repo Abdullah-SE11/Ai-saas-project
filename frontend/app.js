@@ -99,6 +99,11 @@ function setLoading(isLoading) {
 }
 
 function renderResults(data) {
+    if (!data || !data.lesson_plan || !data.worksheet) {
+        console.error("Invalid data received:", data);
+        alert("The AI returned an incomplete plan. Please try again.");
+        return;
+    }
     const { lesson_plan, worksheet } = data;
     const topic = document.getElementById('topic').value;
     const labContent = document.getElementById('lab-content');
@@ -107,17 +112,17 @@ function renderResults(data) {
     teacherPlan.innerHTML = `
         <div class="plan-section">
             <h3>🎯 Learning Objectives</h3>
-            <ul>${lesson_plan.objectives.map(o => `<li>${o}</li>`).join('')}</ul>
+            <ul>${(lesson_plan.objectives || []).map(o => `<li>${o}</li>`).join('')}</ul>
         </div>
         
         <div class="plan-section">
             <h3>📚 Materials Needed</h3>
-            <ul>${lesson_plan.materials.map(m => `<li>${m}</li>`).join('')}</ul>
+            <ul>${(lesson_plan.materials || []).map(m => `<li>${m}</li>`).join('')}</ul>
         </div>
         
         <div class="plan-section">
             <h3>⏱️ Activity Timeline</h3>
-            <ol>${lesson_plan.activities.map(a => `<li>${a}</li>`).join('')}</ol>
+            <ol>${(lesson_plan.activities || []).map(a => `<li>${a}</li>`).join('')}</ol>
         </div>
         
         <div class="plan-section">
@@ -142,11 +147,11 @@ function renderResults(data) {
         
         <div class="sheet-section">
             <h4>Part 1: Multiple Choice</h4>
-            ${worksheet.mcqs.map((m, i) => `
+            ${(worksheet.mcqs || []).map((m, i) => `
                 <div class="sheet-question">
                     <p><strong>${i + 1}. ${m.q}</strong></p>
                     <div class="options-grid">
-                        ${m.o.map(opt => `<span>( ) ${opt}</span>`).join('')}
+                        ${(m.o || []).map(opt => `<span>( ) ${opt}</span>`).join('')}
                     </div>
                 </div>
             `).join('')}
@@ -154,7 +159,7 @@ function renderResults(data) {
 
         <div class="sheet-section">
             <h4>Part 2: Fill in the Blanks</h4>
-            ${worksheet.fill_blanks.map((fb, i) => `
+            ${(worksheet.fill_blanks || []).map((fb, i) => `
                 <div class="sheet-question">
                     <p><strong>${i + 1}.</strong> ${fb.q}</p>
                 </div>
@@ -163,7 +168,7 @@ function renderResults(data) {
 
         <div class="sheet-section">
             <h4>Part 3: Short Questions</h4>
-            ${worksheet.short_questions.map((sq, i) => `
+            ${(worksheet.short_questions || []).map((sq, i) => `
                 <div class="sheet-question">
                     <p><strong>${i + 1}.</strong> ${sq.q}</p>
                     <div class="answer-line"></div>
@@ -182,15 +187,15 @@ function renderResults(data) {
         <div class="lab-grid">
             <div class="lab-card">
                 <h4>Multiple Choice Answers</h4>
-                <ul>${worksheet.mcqs.map(m => `<li><strong>Q:</strong> ${m.q}<br><strong>A:</strong> ${m.a}</li>`).join('')}</ul>
+                <ul>${(worksheet.mcqs || []).map(m => `<li><strong>Q:</strong> ${m.q}<br><strong>A:</strong> ${m.a}</li>`).join('')}</ul>
             </div>
             <div class="lab-card">
                 <h4>Fill in the Blanks Key</h4>
-                <ul>${worksheet.fill_blanks.map(fb => `<li><strong>Q:</strong> ${fb.q}<br><strong>Key:</strong> ${fb.a}</li>`).join('')}</ul>
+                <ul>${(worksheet.fill_blanks || []).map(fb => `<li><strong>Q:</strong> ${fb.q}<br><strong>Key:</strong> ${fb.a}</li>`).join('')}</ul>
             </div>
             <div class="lab-card">
                 <h4>Short Question Guide</h4>
-                <ul>${worksheet.short_questions.map(sq => `<li><strong>Q:</strong> ${sq.q}<br><strong>Guide:</strong> ${sq.a}</li>`).join('')}</ul>
+                <ul>${(worksheet.short_questions || []).map(sq => `<li><strong>Q:</strong> ${sq.q}<br><strong>Guide:</strong> ${sq.a}</li>`).join('')}</ul>
             </div>
         </div>
     `;
